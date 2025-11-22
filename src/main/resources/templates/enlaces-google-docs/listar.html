@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlaces Google Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Gestión Documental</a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Salir</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-google"></i> Enlaces Google Docs</h2>
+            <div>
+                <a href="/enlaces-google-docs/nuevo" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Nuevo Enlace
+                </a>
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${mensaje}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>URL</th>
+                                <th>Cuenta Acceso</th>
+                                <th>Validado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enlace : ${enlaces}">
+                                <td th:text="${enlace.nombre}">Nombre</td>
+                                <td>
+                                    <a th:href="${enlace.direccionWeb}" target="_blank" class="text-decoration-none">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        <span th:text="${#strings.abbreviate(enlace.direccionWeb, 50)}">URL</span>
+                                    </a>
+                                </td>
+                                <td th:text="${enlace.cuentaAcceso}">-</td>
+                                <td>
+                                    <span th:if="${enlace.validadoCalidad}" class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Validado
+                                    </span>
+                                    <span th:unless="${enlace.validadoCalidad}" class="badge bg-warning">
+                                        <i class="bi bi-clock"></i> Pendiente
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/enlaces-google-docs/editar/{id}(id=${enlace.id})}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/enlaces-google-docs/eliminar/{id}(id=${enlace.id})}" 
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('¿Estás seguro de eliminar este enlace?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

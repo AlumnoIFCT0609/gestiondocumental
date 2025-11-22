@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Montar y Formatear Recurso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .recursos-panel {
+            height: 600px;
+            overflow-y: auto;
+            border: 2px dashed #ddd;
+            padding: 15px;
+        }
+        .canvas-area {
+            min-height: 600px;
+            border: 2px solid #007bff;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .recurso-item {
+            cursor: move;
+            transition: transform 0.2s;
+        }
+        .recurso-item:hover {
+            transform: scale(1.05);
+        }
+        .dropped-item {
+            position: absolute;
+            border: 2px solid #28a745;
+            padding: 10px;
+            background: white;
+            cursor: move;
+            resize: both;
+            overflow: auto;
+        }
+        .template-grid {
+            display: grid;
+            gap: 10px;
+            height: 100%;
+        }
+        .template-1col { grid-template-columns: 1fr; }
+        .template-2col { grid-template-columns: 1fr 1fr; }
+        .template-2row2col { 
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: 1fr 1fr;
+        }
+        .template-completo {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+        .grid-zone {
+            border: 1px dashed #ccc;
+            padding: 10px;
+            min-height: 150px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Gestión Documental</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2><i class="bi bi-file-earmark-plus"></i> Crear Recurso Elaborado</h2>
+            <a href="/dashboard" class="btn btn-secondary">Volver</a>
+        </div>
+
+        <div class="row">
+            <!-- Panel de Recursos Disponibles -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-folder2-open"></i> Recursos Disponibles</h5>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="recursos-panel" id="recursosPanel">
+                            <div th:each="recurso : ${recursos}" 
+                                 class="card mb-2 recurso-item"
+                                 draggable="true"
+                                 th:data-id="${recurso.id}"
+                                 th:data-nombre="${recurso.nombre}"
+                                 th:data-tipo="${recurso.tipoRecurso}">
+                                <div class="card-body p-2">
+                                    <small class="badge bg-secondary" th:text="${recurso.tipoRecurso}"></small>
+                                    <p class="mb-0 small" th:text="${recurso.nombre}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas de Trabajo -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="bi bi-layout-text-window-reverse"></i> Canvas de Trabajo</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="setTemplate('1col')">
+                                <i class="bi bi-layout-split"></i> 1 Col
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="setTemplate('2col')">
+                                <i class="bi bi-columns"></i> 2 Col
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="setTemplate('2row2col')">
+                                <i class="bi bi-grid"></i> 2x2
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="setTemplate('completo')">
+                                <i class="bi bi-grid-3x3"></i> Completo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="canvas-area" id="canvasArea">
+                            <!-- Aquí se colocarán los elementos arrastrados -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Configuración -->
+            <div class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-gear"></i> Configuración</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Recurso</label>
+                            <input type="text" class="form-control" id="nombreRecurso" placeholder="Mi Manual">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcionRecurso" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Uso</label>
+                            <select class="form-select" id="usoRecurso">
+                                <option value="DOCENCIA">Docencia</option>
+                                <option value="EMPRESA">Empresa</option>
+                                <option value="PARTICULAR">Particular</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Creado Para</label>
+                            <select class="form-select" id="creadoPara">
+                                <option value="EMPRESA">Empresa</option>
+                                <option value="PARTICULAR">Particular</option>
+                                <option value="GOBIERNO">Gobierno</option>
+                                <option value="ONG">ONG</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Materia</label>
+                            <select class="form-select" id="materia">
+                                <option value="MATEMATICAS">Matemáticas</option>
+                                <option value="LENGUAJE">Lenguaje</option>
+                                <option value="FISICA">Física</option>
+                                <option value="INFORMATICA">Informática</option>
+                                <option value="OTROS">Otros</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Licencia</label>
+                            <select class="form-select" id="licencia">
+                                <option th:each="lic : ${licencias}" 
+                                        th:value="${lic.id}" 
+                                        th:text="${lic.licencia}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5><i class="bi bi-tools"></i> Acciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100 mb-2" onclick="guardarRecurso()">
+                            <i class="bi bi-save"></i> Guardar Borrador
+                        </button>
+                        <button class="btn btn-success w-100 mb-2" onclick="generarPDF()">
+                            <i class="bi bi-file-pdf"></i> Generar PDF
+                        </button>
+                        <button class="btn btn-danger w-100" onclick="limpiarCanvas()">
+                            <i class="bi bi-trash"></i> Limpiar Todo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        let recursosSeleccionados = [];
+        let templateActual = null;
+
+        // Configurar drag & drop
+        document.querySelectorAll('.recurso-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    id: this.dataset.id,
+                    nombre: this.dataset.nombre,
+                    tipo: this.dataset.tipo
+                }));
+            });
+        });
+		
+        
+        
+        const canvasArea = document.getElementById('canvasArea');
+        canvasArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        canvasArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            
+            const rect = canvasArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            agregarRecursoAlCanvas(data, x, y);
+        });
+
+        function agregarRecursoAlCanvas(recurso, x, y) {
+            const div = document.createElement('div');
+            div.className = 'dropped-item';
+            div.style.left = x + 'px';
+            div.style.top = y + 'px';
+            div.style.width = '200px';
+            div.style.height = '150px';
+            div.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <small class="badge bg-info">${recurso.tipo}</small>
+                    <button class="btn btn-sm btn-danger" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <p class="mt-2"><strong>${recurso.nombre}</strong></p>
+                <small>ID: ${recurso.id}</small>
+            `;
+            
+            div.dataset.recursoId = recurso.id;
+            canvasArea.appendChild(div);
+            recursosSeleccionados.push(recurso);
+
+            // Hacer el elemento draggable dentro del canvas
+            makeDraggable(div);
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        function setTemplate(tipo) {
+            canvasArea.innerHTML = '';
+            canvasArea.className = 'canvas-area template-grid';
+            templateActual = tipo;
+
+            switch(tipo) {
+                case '1col':
+                    canvasArea.classList.add('template-1col');
+                    canvasArea.innerHTML = '<div class="grid-zone">Zona 1</div>';
+                    break;
+                case '2col':
+                    canvasArea.classList.add('template-2col');
+                    canvasArea.innerHTML = `
+                        <div class="grid-zone">Zona 1</div>
+                        <div class="grid-zone">Zona 2</div>
+                    `;
+                    break;
+                case '2row2col':
+                    canvasArea.classList.add('template-2row2col');
+                    canvasArea.innerHTML = `
+                        <div class="grid-zone">Zona 1</div>
+                        <div class="grid-zone">Zona 2</div>
+                        <div class="grid-zone">Zona 3</div>
+                        <div class="grid-zone">Zona 4</div>
+                    `;
+                    break;
+                case 'completo':
+                    canvasArea.classList.add('template-completo');
+                    canvasArea.innerHTML = `
+                        <div class="grid-zone" style="grid-column: 1/3;">Cabecera</div>
+                        <div class="grid-zone">Zona Central 1</div>
+                        <div class="grid-zone">Zona Central 2</div>
+                        <div class="grid-zone" style="grid-column: 1/3;">Pie</div>
+                    `;
+                    break;
+            }
+
+            // Agregar drag & drop a las zonas
+            document.querySelectorAll('.grid-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    this.innerHTML = `
+                        <div class="alert alert-success mb-0">
+                            <strong>${data.nombre}</strong><br>
+                            <small>Tipo: ${data.tipo}</small>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function guardarRecurso() {
+            const datos = {
+                nombre: document.getElementById('nombreRecurso').value,
+                descripcion: document.getElementById('descripcionRecurso').value,
+                uso: document.getElementById('usoRecurso').value,
+                creadoPara: document.getElementById('creadoPara').value,
+                materia: document.getElementById('materia').value,
+                licenciaId: document.getElementById('licencia').value,
+                template: templateActual,
+                recursos: recursosSeleccionados,
+                composicion: canvasArea.innerHTML
+            };
+            const csrfToken = /*[[${_csrf.token}]]*/ '';
+            const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+            console.log("CSRF token:", csrfToken);
+            console.log("CSRF header:", csrfHeader);
+            
+            const token = document.querySelector('meta[name="_csrf"]').content;
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+            console.log("CSRF Token script:", token);
+            console.log("CSRF header script:", header);
+            if (!datos.nombre) {
+                alert('Por favor, introduce un nombre para el recurso');
+                return;
+            }
+
+            fetch('/recursos-elaborados/guardar-borrador', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Borrador guardado correctamente con ID: ' + data.id);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar el borrador');
+            });
+        }
+
+        function generarPDF() {
+            const datos = {
+                nombre: document.getElementById('nombreRecurso').value,
+                descripcion: document.getElementById('descripcionRecurso').value,
+                uso: document.getElementById('usoRecurso').value,
+                creadoPara: document.getElementById('creadoPara').value,
+                materia: document.getElementById('materia').value,
+                licenciaId: document.getElementById('licencia').value,
+                template: templateActual,
+                recursos: recursosSeleccionados,
+                composicion: canvasArea.innerHTML
+            };
+
+            if (!datos.nombre) {
+                alert('Por favor, introduce un nombre para el recurso');
+                return;
+            }
+
+            fetch('/recursos-elaborados/generar-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = datos.nombre + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                alert('✓ PDF generado y descargado correctamente');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al generar el PDF');
+            });
+        }
+
+        function limpiarCanvas() {
+            if (confirm('¿Estás seguro de que quieres limpiar todo?')) {
+                canvasArea.innerHTML = '';
+                canvasArea.className = 'canvas-area';
+                recursosSeleccionados = [];
+                templateActual = null;
+            }
+        }
+    </script>
+</body>
+</html>

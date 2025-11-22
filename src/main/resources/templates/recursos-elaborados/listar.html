@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursos Elaborados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Gestión Documental</a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-collection"></i> Recursos Elaborados</h2>
+            <div>
+                <a href="/recursos/montar-formatear" class="btn btn-success" 
+                   sec:authorize="hasAnyRole('CREATOR', 'ADMIN')">
+                    <i class="bi bi-plus-circle"></i> Crear Nuevo
+                </a>
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div th:each="recurso : ${recursos}" class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" th:text="${recurso.nombre}">Nombre</h5>
+                        <span th:if="${recurso.validadoCalidad}" class="badge bg-success">
+                            <i class="bi bi-check-circle"></i>
+                        </span>
+                        <span th:unless="${recurso.validadoCalidad}" class="badge bg-warning">
+                            <i class="bi bi-clock"></i>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-person"></i> 
+                            Creado por: <span th:text="${recurso.usuarioCreador.nombre}"></span>
+                        </p>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-calendar"></i> 
+                            <span th:text="${#temporals.format(recurso.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></span>
+                        </p>
+                        <div class="mb-2">
+                            <span class="badge bg-info me-1" th:text="${recurso.uso}"></span>
+                            <span class="badge bg-secondary" th:text="${recurso.materia}"></span>
+                        </div>
+                        <p class="mb-2">
+                            <small><i class="bi bi-building"></i> Para: 
+                                <strong th:text="${recurso.creadoPara}"></strong>
+                            </small>
+                        </p>
+                        <p class="mb-0" th:if="${recurso.licencia}">
+                            <small><i class="bi bi-shield-check"></i> 
+                                <span th:text="${recurso.licencia.codigo}"></span>
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a th:href="@{/recursos-elaborados/visualizar/{id}(id=${recurso.id})}" 
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                        
+                        <div class="btn-group float-end" sec:authorize="hasAnyRole('QUALITY', 'ADMIN')">
+                            <form th:action="@{/recursos-elaborados/validar/{id}(id=${recurso.id})}" 
+                                  method="post" class="d-inline">
+                                <input type="hidden" name="validado" value="true">
+                                <button type="submit" class="btn btn-sm btn-success" 
+                                        th:disabled="${recurso.validadoCalidad}">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            </form>
+                            <form th:action="@{/recursos-elaborados/validar/{id}(id=${recurso.id})}" 
+                                  method="post" class="d-inline">
+                                <input type="hidden" name="validado" value="false">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/recursos-elaborados(page=${currentPage - 1})}">Anterior</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/recursos-elaborados(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/recursos-elaborados(page=${currentPage + 1})}">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

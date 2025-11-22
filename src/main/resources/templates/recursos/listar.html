@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-folder-fill"></i> Gestión Documental
+            </a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-file-earmark"></i> Recursos</h2>
+            <div>
+                <form th:action="@{/recursos/escanear}" method="post" class="d-inline" 
+                      sec:authorize="hasAnyRole('ADMIN', 'QUALITY')">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-arrow-repeat"></i> Escanear Directorio
+                    </button>
+                </form>
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${mensaje}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Validado</th>
+                                <th>Usos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="recurso : ${recursos}">
+                                <td>
+                                    <span class="badge bg-info" th:text="${recurso.tipoRecurso}"></span>
+                                </td>
+                                <td th:text="${recurso.nombre}">Nombre</td>
+                                <td th:text="${recurso.descripcion}">Descripción</td>
+                                <td>
+                                    <span th:if="${recurso.validadoCalidad}" class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Validado
+                                    </span>
+                                    <span th:unless="${recurso.validadoCalidad}" class="badge bg-warning">
+                                        <i class="bi bi-clock"></i> Pendiente
+                                    </span>
+                                </td>
+                                <td th:text="${recurso.contadorUsos}">0</td>
+                                <td>
+                                    <a th:href="@{/recursos/visualizar/{tipo}/{id}(tipo=${recurso.tipoRecurso}, id=${recurso.id})}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    
+                                    <div class="btn-group" sec:authorize="hasAnyRole('QUALITY', 'ADMIN')">
+                                        <form th:action="@{/recursos/validar/{tipo}/{id}(tipo=${recurso.tipoRecurso}, id=${recurso.id})}" 
+                                              method="post" class="d-inline">
+                                            <input type="hidden" name="validado" value="true">
+                                            <button type="submit" class="btn btn-sm btn-success" 
+                                                    th:disabled="${recurso.validadoCalidad}">
+                                                <i class="bi bi-check"></i>
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/recursos/validar/{tipo}/{id}(tipo=${recurso.tipoRecurso}, id=${recurso.id})}" 
+                                              method="post" class="d-inline">
+                                            <input type="hidden" name="validado" value="false">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Enlace Google Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Gestión Documental</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="bi bi-google"></i> 
+                            <span th:text="${enlace.id == null} ? 'Nuevo Enlace Google Docs' : 'Editar Enlace'">Formulario</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <form th:action="@{/enlaces-google-docs/guardar}" th:object="${enlace}" method="post">
+                            <input type="hidden" th:field="*{id}">
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del Documento *</label>
+                                <input type="text" class="form-control" id="nombre" 
+                                       th:field="*{nombre}" required
+                                       placeholder="Ej: Manual de Usuario 2024">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="direccionWeb" class="form-label">URL de Google Docs *</label>
+                                <input type="url" class="form-control" id="direccionWeb" 
+                                       th:field="*{direccionWeb}" required
+                                       placeholder="https://docs.google.com/document/d/...">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cuentaAcceso" class="form-label">Cuenta de Acceso</label>
+                                <input type="email" class="form-control" id="cuentaAcceso" 
+                                       th:field="*{cuentaAcceso}"
+                                       placeholder="usuario@gmail.com">
+                                <small class="form-text text-muted">Email de la cuenta con permisos de acceso</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="passwordAcceso" class="form-label">Password de Acceso</label>
+                                <input type="password" class="form-control" id="passwordAcceso" 
+                                       th:field="*{passwordAcceso}">
+                                <small class="form-text text-muted">Opcional: para acceso automatizado</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" 
+                                          th:field="*{descripcion}" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="licenciaCC" class="form-label">Licencia</label>
+                                <select class="form-select" id="licenciaCC" th:field="*{licenciaCC.id}">
+                                    <option value="">Sin licencia</option>
+                                    <option th:each="lic : ${licencias}" 
+                                            th:value="${lic.id}" 
+                                            th:text="${lic.licencia}"></option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/enlaces-google-docs" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

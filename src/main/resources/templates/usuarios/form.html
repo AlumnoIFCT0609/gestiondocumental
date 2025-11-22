@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${esNuevo} ? 'Nuevo Usuario' : 'Editar Usuario'">Formulario Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Gestión Documental</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 th:text="${esNuevo} ? 'Nuevo Usuario' : 'Editar Usuario'">Formulario</h3>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+                            <input type="hidden" th:field="*{id}">
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                                <div th:if="${#fields.hasErrors('nombre')}" class="text-danger">
+                                    <small th:errors="*{nombre}"></small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                <div th:if="${#fields.hasErrors('email')}" class="text-danger">
+                                    <small th:errors="*{email}"></small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="rol" class="form-label">Rol *</label>
+                                <select class="form-select" id="rol" th:field="*{rol}" required>
+                                    <option value="">Seleccionar rol...</option>
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    <ul class="mb-0 mt-2">
+                                        <li><strong>ADMIN:</strong> Acceso total al sistema</li>
+                                        <li><strong>QUALITY:</strong> Validar recursos y gestionar licencias</li>
+                                        <li><strong>CREATOR:</strong> Crear recursos elaborados</li>
+                                        <li><strong>READER:</strong> Solo lectura de recursos validados</li>
+                                    </ul>
+                                </small>
+                            </div>
+
+                            <div class="mb-3" th:if="${esNuevo}">
+                                <label for="password" class="form-label">Contraseña *</label>
+                                <input type="password" class="form-control" id="password" 
+                                       th:field="*{password}" th:required="${esNuevo}">
+                                <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                            </div>
+
+                            <div class="mb-3" th:unless="${esNuevo}">
+                                <label for="nuevaPassword" class="form-label">Nueva Contraseña</label>
+                                <input type="password" class="form-control" id="nuevaPassword" name="nuevaPassword">
+                                <small class="form-text text-muted">Dejar en blanco para mantener la actual</small>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/usuarios" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

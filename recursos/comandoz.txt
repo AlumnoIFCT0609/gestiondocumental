@@ -1,0 +1,119 @@
+Listado de rutas de carpetas para el volumen OS
+El número de serie del volumen es 3229-0897
+C:.
+├───ALGJL.SERVICEDAEMON.sln
+│   │   ALGJL.SERVICEDAEMON.sln
+│   │
+│   └───ALGJL.SERVICEDAEMON
+│       │   ALGJL.SERVICEDAEMON.csproj
+│       │   App.config
+│       │   DataSet1.Designer.cs
+│       │   DataSet1.xsc
+│       │   DataSet1.xsd
+│       │   DataSet1.xss
+│       │   Form1.cs
+│       │   Form1.Designer.cs
+│       │   Form1.resx
+│       │   Program.cs
+│       │   Service1.cs
+│       │   Service1.Designer.cs
+│       │
+│       ├───bin
+│       │   └───Debug
+│       ├───Connected Services
+│       ├───obj
+│       │   └───Debug
+│       │       │   .NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+│       │       │   ALGJL.SERVICEDAEMON.csproj.AssemblyReference.cache
+│       │       │   DesignTimeResolveAssemblyReferences.cache
+│       │       │   DesignTimeResolveAssemblyReferencesInput.cache
+│       │       │
+│       │       └───TempPE
+│       │               DataSet1.Designer.cs.dll
+│       │
+│       └───Properties
+│               AssemblyInfo.cs
+│               Settings.Designer.cs
+│               Settings.settings
+│
+├───Alumnos
+│   │   Alumnos.csproj
+│   │   Alumnos.sln
+│   │   App.config
+│   │   App.xaml
+│   │   App.xaml.cs
+│   │   DataSet1.Designer.cs
+│   │   DataSet1.xsc
+│   │   DataSet1.xsd
+│   │   DataSet1.xss
+│   │   MainWindow.xaml
+│   │   MainWindow.xaml.cs
+│   │
+│   ├───bin
+│   │   └───Debug
+│   │           Alumnos.exe
+│   │           Alumnos.exe.config
+│   │           Alumnos.pdb
+│   │
+│   ├───Connected Services
+│   ├───obj
+│   │   └───Debug
+│   │       │   .NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+│   │       │   Alumnos.csproj.AssemblyReference.cache
+│   │       │   Alumnos.csproj.CoreCompileInputs.cache
+│   │       │   Alumnos.csproj.FileListAbsolute.txt
+│   │       │   Alumnos.csproj.GenerateResource.cache
+│   │       │   Alumnos.exe
+│   │       │   Alumnos.g.resources
+│   │       │   Alumnos.pdb
+│   │       │   Alumnos.Properties.Resources.resources
+│   │       │   Alumnos_MarkupCompile.cache
+│   │       │   Alumnos_MarkupCompile.i.cache
+│   │       │   Alumnos_MarkupCompile.lref
+│   │       │   App.g.cs
+│   │       │   App.g.i.cs
+│   │       │   DesignTimeResolveAssemblyReferencesInput.cache
+│   │       │   MainWindow.baml
+│   │       │   MainWindow.g.cs
+│   │       │   MainWindow.g.i.cs
+│   │       │
+│   │       └───TempPE
+│   │               DataSet1.Designer.cs.dll
+│   │               Properties.Resources.Designer.cs.dll
+│   │
+│   └───Properties
+│       │   AssemblyInfo.cs
+│       │   Resources.Designer.cs
+│       │   Resources.resx
+│       │   Settings.Designer.cs
+│       │   Settings.settings
+│       │
+│       └───DataSources
+│               Alumnos.Properties.Resources.datasource
+│               Alumnos.Properties.Settings.datasource
+│
+└───ConsoleApp1
+    │   App.config
+    │   ConsoleApp1.csproj
+    │   ConsoleApp1.sln
+    │   Program.cs
+    │
+    ├───bin
+    │   └───Debug
+    │           ConsoleApp1.exe
+    │           ConsoleApp1.exe.config
+    │           ConsoleApp1.pdb
+    │
+    ├───obj
+    │   └───Debug
+    │       │   .NETFramework,Version=v4.7.1.AssemblyAttributes.cs
+    │       │   ConsoleApp1.csproj.AssemblyReference.cache
+    │       │   ConsoleApp1.csproj.CoreCompileInputs.cache
+    │       │   ConsoleApp1.csproj.FileListAbsolute.txt
+    │       │   ConsoleApp1.exe
+    │       │   ConsoleApp1.pdb
+    │       │   DesignTimeResolveAssemblyReferencesInput.cache
+    │       │
+    │       └───TempPE
+    └───Properties
+            AssemblyInfo.cs
