@@ -7,7 +7,8 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "textos_formateados")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
@@ -20,4 +21,5 @@ public class TextoFormateado extends Recurso {
     protected void onCreate() {
         setTipoRecurso(TipoRecurso.TEXTO_FORMATEADO);
     }
+
 }

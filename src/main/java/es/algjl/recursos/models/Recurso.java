@@ -41,4 +41,10 @@ public abstract class Recurso {
     public void incrementarUsos() {
         this.contadorUsos++;
     }
+
+    public String getExtension() {
+        if(nombre == null) return "";
+        int i = nombre.lastIndexOf('.');
+        return (i > 0) ? nombre.substring(i + 1).toLowerCase() : "";
+    }
 }

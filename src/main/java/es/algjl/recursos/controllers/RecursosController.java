@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,10 +61,12 @@ public class RecursosController {
     @GetMapping("/visualizar/archivo/{tipo}/{id}")
     public ResponseEntity<byte[]> visualizarArchivo(
             @PathVariable String tipo,
-            @PathVariable Long id) throws IOException {
+            @PathVariable Long id,
+            Model model) throws IOException {
 
         Recurso recurso = obtenerRecursoPorTipoId(tipo, id);
 
+        
         // Solo para IMAGEN y PDF
         if (recurso instanceof Imagen imagen) {
 
@@ -93,8 +96,77 @@ public class RecursosController {
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(datos);
         }
+     // TEXTO PLANO
+        if (recurso instanceof TextoPlano textoPlano) {
+        	Path ruta = Paths.get(textoPlano.getDirectorioOrigen());
+            if (!Files.exists(ruta)) return ResponseEntity.notFound().build();
+
+            byte[] datos = Files.readAllBytes(ruta);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(datos);
+        }
+
+
+        // TEXTO FORMATEADO (doc, odt ...)
+        if (recurso instanceof TextoFormateado texto) {
+
+            Path ruta = Paths.get(texto.getDirectorioOrigen());
+            if (!Files.exists(ruta)) return ResponseEntity.notFound().build();
+
+            byte[] datos = Files.readAllBytes(ruta);
+
+            String nombre = ruta.toString().toLowerCase();
+            String mime;
+
+            if (nombre.endsWith(".odt"))
+                mime = "application/vnd.oasis.opendocument.text";
+            else if (nombre.endsWith(".docx"))
+                mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            else if (nombre.endsWith(".doc"))
+                mime = "application/msword";
+            else if (nombre.endsWith(".rtf"))
+                mime = "application/rtf";
+            else if (nombre.endsWith(".html") || nombre.endsWith(".htm"))
+                mime = "text/html";
+           
+            else
+                mime = "application/octet-stream"; // por defecto
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                    .contentType(MediaType.parseMediaType(mime))
+                    .body(datos);
+        }
+
+
+        // HOJA DE CÁLCULO (.xlsx)
+        if (recurso instanceof HojaCalculo hojaCalculo) {
+        	Path ruta = Paths.get(hojaCalculo.getDirectorioOrigen());
+            if (!Files.exists(ruta)) return ResponseEntity.notFound().build();
+
+            byte[] datos = Files.readAllBytes(ruta);
+            String mime = Files.probeContentType(ruta);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                    .contentType(MediaType.parseMediaType(
+                            mime != null ? mime : "application/octet-stream"
+                    ))
+                    .body(datos);
+        }
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        String fileUrl = baseUrl + "/recursos/visualizar/archivo/TEXTO_FORMATEADO/" + recurso.getId();
+        String extension;
+        if (recurso.getNombre() != null && recurso.getNombre().contains(".")) {
+           extension = recurso.getNombre()
+                               .substring(recurso.getNombre().lastIndexOf('.') + 1)
+                               .toLowerCase();
+        }
         
         
+        model.addAttribute("fileUrl", fileUrl);
 
         // Si luego tienes clase PDF, se haría igual que arriba.
         return ResponseEntity.badRequest().build();
@@ -170,6 +242,13 @@ public class RecursosController {
         return "recursos/montar-formatear";
     }
     private Recurso obtenerRecursoPorTipoId(String tipo, Long id) {
+    	 // Normalización:
+        //   "TEXTO_PLANO" → "texto-plano"
+        //   "TEXTO_FORMATEADO" → "texto-formateado"
+        //   "HOJA_CALCULO" → "hoja-calculo"
+      
+        tipo = tipo.toLowerCase().replace("_", "-");
+
         return switch (tipo.toLowerCase()) {
             case "imagen" -> imagenService.buscarPorId(id).orElseThrow();
             case "pdf" -> pdfService.buscarPorId(id).orElseThrow();
